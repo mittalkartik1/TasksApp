@@ -2,11 +2,14 @@ import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 import {
   Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   Switch,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { COLORS, STRINGS } from '../../constants/enum/GeneralEnum';
@@ -35,7 +38,7 @@ const TaskDetailScreen = (props: any) => {
       headerRight: setHeaderRight,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [task]);
+  }, [task, isEditable]);
 
   useEffect(() => {
     if (!isNewTask) {
@@ -71,9 +74,10 @@ const TaskDetailScreen = (props: any) => {
       //updating locally
       dispatch(
         tasksApi.util.updateQueryData('getTasks', undefined, draftTasks => {
-          const index = draftTasks?.findIndex(
-            (taskItem: Task) => taskItem.id === task.id,
-          ) ?? -1;
+          const index =
+            draftTasks?.findIndex(
+              (taskItem: Task) => taskItem.id === task.id,
+            ) ?? -1;
           if (index !== -1 && draftTasks) draftTasks[index] = task;
         }),
       );
@@ -92,9 +96,10 @@ const TaskDetailScreen = (props: any) => {
       //deleting locally
       dispatch(
         tasksApi.util.updateQueryData('getTasks', undefined, draftTasks => {
-          const index = draftTasks?.findIndex(
-            (taskItem: Task) => taskItem.id === task.id,
-          ) ?? -1;
+          const index =
+            draftTasks?.findIndex(
+              (taskItem: Task) => taskItem.id === task.id,
+            ) ?? -1;
           if (index !== -1) draftTasks?.splice(index, 1);
         }),
       );
@@ -122,82 +127,94 @@ const TaskDetailScreen = (props: any) => {
     <View style={styles.rowCenter}>
       {!isNewTask && (
         <>
-          <TouchableOpacity onPress={() => setIsEditable(true)}>
-            <Image
-              style={styles.editImageStyle}
-              source={require('../../assets/images/pencil.png')}
-            />
-          </TouchableOpacity>
+          {!isEditable && (
+            <TouchableOpacity onPress={() => setIsEditable(true)}>
+              <Image
+                style={styles.editImageStyle}
+                source={require('../../assets/images/pencil.png')}
+              />
+            </TouchableOpacity>
+          )}
           <TouchableOpacity onPress={() => executeIfOnline(onDeleteClick)}>
             <Image
-              style={styles.editImageStyle}
+              style={styles.saveImageStyle}
               source={require('../../assets/images/delete.png')}
             />
           </TouchableOpacity>
         </>
       )}
-      <TouchableOpacity onPress={onSaveClick}>
-        <Image
-          style={styles.saveImageStyle}
-          source={require('../../assets/images/save.png')}
-        />
-      </TouchableOpacity>
     </View>
   );
 
   return (
-    <View style={styles.container}>
-      {isEditable && (
-        <Text style={styles.titleStyle}>
-          {STRINGS.TASK_TITLE}
-        </Text>
-      )}
-      <TextInput
-        placeholder={STRINGS.TASK_TITLE}
-        editable={isEditable}
-        placeholderTextColor={'gray'}
-        value={task.title}
-        multiline
-        onChangeText={(text: string) =>
-          setTask(prevState => ({ ...prevState, title: text }))
-        }
-        style={[styles.taskTitleStyle, isEditable ? styles.taskEditStyle : {}]}
-      />
-      {isEditable && (
-        <Text
-          style={styles.descStyle}
-        >
-          {STRINGS.ENTER_DESC}
-        </Text>
-      )}
-      <TextInput
-        placeholder={STRINGS.ENTER_DESC}
-        multiline
-        editable={isEditable}
-        placeholderTextColor={'gray'}
-        value={task.body}
-        onChangeText={(text: string) =>
-          setTask(prevState => ({ ...prevState, body: text }))
-        }
-        style={[styles.taskBodyStyle, isEditable ? styles.taskEditStyle : {}]}
-      />
-      <View style={styles.statusView}>
-        <Text
-          style={styles.statusStyle}
-        >
-          {'Is Completed'}
-        </Text>
-        <Switch
-          value={task.completed}
-          onValueChange={newValue =>
-            setTask(prevState => ({ ...prevState, completed: newValue }))
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'android' ? 'height' : 'padding'}
+      style={styles.parentView}
+      keyboardVerticalOffset={100}
+    >
+      <ScrollView style={styles.flex1}>
+        <Text style={styles.titleStyle}>{STRINGS.TASK_TITLE}</Text>
+        <TextInput
+          placeholder={STRINGS.TASK_TITLE}
+          editable={isEditable}
+          placeholderTextColor={'gray'}
+          value={task.title}
+          multiline
+          onChangeText={(text: string) =>
+            setTask(prevState => ({ ...prevState, title: text }))
           }
-          thumbColor={isEditable ? COLORS.PRIMARY : 'gray'}
-          disabled={!isEditable}
-          trackColor={{ false: '#C4C4C4', true: '#A9D2FC' }} // light blue & gray
+          style={[
+            styles.taskTitleStyle,
+            isEditable ? styles.taskEditStyle : {},
+          ]}
         />
-      </View>
-    </View>
+        <View
+          style={styles.separatorStyle}
+        />
+        <Text style={styles.titleStyle}>{STRINGS.TASK_DESC}</Text>
+        <TextInput
+          placeholder={STRINGS.ENTER_DESC}
+          multiline
+          editable={isEditable}
+          placeholderTextColor={'gray'}
+          value={task.body}
+          onChangeText={(text: string) =>
+            setTask(prevState => ({ ...prevState, body: text }))
+          }
+          style={[styles.taskBodyStyle, isEditable ? styles.taskEditStyle : {}]}
+        />
+        <View
+          style={styles.separatorStyle}
+        />
+        <View style={styles.statusView}>
+          <Text style={styles.titleStyle}>{'Is Completed'}</Text>
+          <Switch
+            value={task.completed}
+            onValueChange={newValue =>
+              setTask(prevState => ({ ...prevState, completed: newValue }))
+            }
+            thumbColor={isEditable ? COLORS.PRIMARY : 'gray'}
+            disabled={!isEditable}
+            trackColor={{ false: '#C4C4C4', true: '#A9D2FC' }} // light blue & gray
+          />
+        </View>
+        <View
+          style={styles.separatorStyle}
+        />
+      </ScrollView>
+      {(isEditable || isNewTask) && (
+        <TouchableOpacity
+          onPress={onSaveClick}
+          style={styles.footerBtn}
+        >
+          <View style={styles.footerText}>
+            <Text style={styles.footerTextStyle}>
+              {isNewTask ? 'Save' : 'Update'}
+            </Text>
+          </View>
+        </TouchableOpacity>
+      )}
+    </KeyboardAvoidingView>
   );
 };
 

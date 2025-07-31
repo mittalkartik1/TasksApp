@@ -9,13 +9,24 @@ export const showMessage = (
     ToastAndroid.show(msg, ToastAndroid.SHORT);
     onDismiss?.call(null);
   } else {
-    Alert.alert(msg, undefined, undefined, { onDismiss: onDismiss });
+    Alert.alert(
+      msg,
+      undefined,
+      [
+        {
+          text: 'OK',
+          onPress: onDismiss,
+        },
+      ],
+    );
   }
 };
 
 export const executeIfOnline = async (callbackFunc: () => {}) => {
   const state = await NetInfo.fetch();
-  const hasInternet = state.isConnected && state.isInternetReachable;
+  const hasInternet =
+    state.isConnected &&
+    ((Platform.OS === 'ios' && __DEV__) || state.isInternetReachable);
   if (!hasInternet) {
     showMessage('No internet connection');
   } else {

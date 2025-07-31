@@ -9,13 +9,12 @@ export const styles = StyleSheet.create({
     marginRight: 20,
   },
   saveImageStyle: {
-    height: 25,
-    width: 25,
-    tintColor: COLORS.PRIMARY,
+    height: 20,
+    width: 20,
   },
   taskTitleStyle: {
-    fontWeight: 'bold',
-    fontSize: 24,
+    fontWeight: '500',
+    fontSize: 18,
     color: 'black',
   },
   taskEditStyle: {
@@ -35,7 +34,6 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
     padding: 20,
-    paddingTop: 40,
   },
   rowCenter: {
     flexDirection: 'row',
@@ -43,8 +41,9 @@ export const styles = StyleSheet.create({
   },
   titleStyle: {
     marginBottom: 5,
-    fontWeight: 'bold',
+    fontWeight: '600',
     color: 'black',
+    fontSize: 20,
   },
   descStyle: {
     marginTop: 30,
@@ -55,8 +54,9 @@ export const styles = StyleSheet.create({
   statusView: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     gap: 10,
-    paddingVertical: 10
+    paddingBottom: 20,
   },
   statusStyle: {
     paddingLeft: 5,
@@ -64,4 +64,27 @@ export const styles = StyleSheet.create({
     color: 'black',
     fontSize: 16,
   },
+  flex1: {
+    flex: 1,
+  },
+  parentView: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    backgroundColor: 'white',
+  },
+  separatorStyle: {
+    height: 1,
+    backgroundColor: '#D3D3D3',
+    width: '100%',
+    marginBottom: 20,
+  },
+  footerBtn: {
+    backgroundColor: COLORS.PRIMARY,
+    alignItems: 'center',
+    borderRadius: 5,
+    marginBottom: 15,
+  },
+  footerText: { paddingHorizontal: 20, paddingVertical: 15 },
+  footerTextStyle: { color: 'white', fontSize: 16 },
 });

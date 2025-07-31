@@ -4,6 +4,7 @@ import {
   ActivityIndicator,
   Dimensions,
   Image,
+  Platform,
   Text,
   TouchableOpacity,
   View,
@@ -12,11 +13,13 @@ import { TabBar, TabView } from 'react-native-tab-view';
 import { COLORS, SCREENS, STRINGS } from '../../constants/enum/GeneralEnum';
 import { NavigationProp } from '../../constants/interfaces/Navigator';
 import { Task } from '../../constants/interfaces/Task';
-import { useLazyGetTasksQuery } from '../../services/tasksApi';
+import { tasksApi, useLazyGetTasksQuery } from '../../services/tasksApi';
 import TaskFlatList from './components/TaskFlatList';
 import NetInfo from '@react-native-community/netinfo';
 import { styles } from './styles';
 import { showMessage } from '../../utils/Utils';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../redux/store';
 
 const TasksListScreen = () => {
   const [index, setIndex] = useState(0);
@@ -26,8 +29,13 @@ const TasksListScreen = () => {
     { key: 'completedTasks', title: STRINGS.COMPLETED_TASKS },
   ];
 
+  const cachedData = useSelector(
+    (state: RootState) =>
+      tasksApi.endpoints.getTasks.select(undefined)(state)?.data,
+  );
+
   //RTK Query
-  const [triggerGetTasks, { data, isFetching, isError, error }] =
+  const [triggerGetTasks, { data: apiData, isFetching, isError, error }] =
     useLazyGetTasksQuery();
 
   const [shouldRefetch, setShouldRefetch] = useState(true);
@@ -41,6 +49,8 @@ const TasksListScreen = () => {
 
   const isFocused = useIsFocused();
 
+  const listData = apiData || cachedData;
+
   if (isError) {
     showMessage(`Not able to sync ${JSON.stringify(error)}`);
   }
@@ -49,7 +59,8 @@ const TasksListScreen = () => {
     let stableCheck: NodeJS.Timeout;
     const unsubscribe = NetInfo.addEventListener(state => {
       latestNetInfo.current = {
-        reachable: state.isInternetReachable,
+        reachable:
+          (Platform.OS === 'ios' && __DEV__) || state.isInternetReachable,
         isConnected: state.isConnected,
       };
 
@@ -58,7 +69,7 @@ const TasksListScreen = () => {
       stableCheck = setTimeout(() => {
         const hasInternet =
           latestNetInfo.current.reachable && latestNetInfo.current.isConnected;
-        setIsConnected(hasInternet);  
+        setIsConnected(hasInternet);
         if (!hasInternet) {
           //will set refetch flag true if user goes offline
           setShouldRefetch(!hasInternet);
@@ -73,6 +84,7 @@ const TasksListScreen = () => {
     if (isFocused && shouldRefetch && isConnected) {
       refetchData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isFocused, shouldRefetch, isConnected]);
 
   const refetchData = async () => {
@@ -103,14 +115,14 @@ const TasksListScreen = () => {
             return (
               <TaskFlatList
                 key={'pending'}
-                data={(data || []).filter((item: Task) => !item.completed)}
+                data={(listData || []).filter((item: Task) => !item.completed)}
               />
             );
           case 'completedTasks':
             return (
               <TaskFlatList
                 key={'completed'}
-                data={(data || []).filter((item: Task) => item.completed)}
+                data={(listData || []).filter((item: Task) => item.completed)}
               />
             );
         }

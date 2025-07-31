@@ -15,7 +15,7 @@ import { tasksApi } from '../services/tasksApi';
 const persistConfig = {
   key: 'root',
   storage: AsyncStorage,
-  whitelist: ['tasksReducer'],
+  whitelist: [tasksApi.reducerPath],
 };
 
 const rootReducer = combineReducers({

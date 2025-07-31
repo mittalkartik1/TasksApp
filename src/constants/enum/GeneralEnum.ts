@@ -15,6 +15,7 @@ export enum COLORS {
 export enum STRINGS { //strings can be handled via i18next later
     'NO_TASKS' = 'No Tasks Added',
     'TASK_TITLE' = 'Task Title',
+    'TASK_DESC' = 'Task Description',
     'ENTER_DESC' = 'Enter description',
     'PENDING_TASKS' = 'Pending',
     'COMPLETED_TASKS' = 'Completed',
