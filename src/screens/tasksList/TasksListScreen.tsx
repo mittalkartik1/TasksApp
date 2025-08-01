@@ -1,5 +1,5 @@
 import { useIsFocused, useNavigation } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Dimensions,
@@ -51,9 +51,21 @@ const TasksListScreen = () => {
 
   const listData = apiData || cachedData;
 
-  if (isError) {
-    showMessage(`Not able to sync ${JSON.stringify(error)}`);
-  }
+  const pendingData = useMemo(
+    () => (listData || []).filter((item: Task) => !item.completed),
+    [listData],
+  );
+
+  const completedData = useMemo(
+    () => (listData || []).filter((item: Task) => item.completed),
+    [listData],
+  );
+
+  useEffect(() => {
+    if (isError) {
+      showMessage(`Not able to sync ${JSON.stringify(error)}`);
+    }
+  }, [isError, error]);
 
   useEffect(() => {
     let stableCheck: NodeJS.Timeout;
@@ -115,14 +127,14 @@ const TasksListScreen = () => {
             return (
               <TaskFlatList
                 key={'pending'}
-                data={(listData || []).filter((item: Task) => !item.completed)}
+                data={pendingData}
               />
             );
           case 'completedTasks':
             return (
               <TaskFlatList
                 key={'completed'}
-                data={(listData || []).filter((item: Task) => item.completed)}
+                data={completedData}
               />
             );
         }
@@ -151,7 +163,7 @@ const TasksListScreen = () => {
           />
         </View>
       </TouchableOpacity>
-      {isFetching && (
+      {(isFetching || (!__DEV__ && Platform.OS !== 'ios')) && (
         <>
           <View style={styles.loaderTopViewStyle} />
           <View style={styles.loaderBottomViewStyle}>

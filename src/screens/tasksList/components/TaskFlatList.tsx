@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { FlatList, Text, TouchableOpacity, View } from 'react-native';
 import { SCREENS, STRINGS } from '../../../constants/enum/GeneralEnum';
 import { Task } from '../../../constants/interfaces/Task';
@@ -6,10 +6,10 @@ import { styles } from '../styles';
 import { useNavigation } from '@react-navigation/native';
 import { NavigationProp } from '../../../constants/interfaces/Navigator';
 
-const TaskFlatList = ({ data }: { data: Array<Task> }) => {
+const TaskFlatList = React.memo(({ data }: { data: Array<Task> }) => {
   const navigation = useNavigation<NavigationProp>();
 
-  const taskItem = ({item} : {item: Task}) => {
+  const taskItem = useCallback(({item} : {item: Task}) => {
     return (
       <TouchableOpacity
         onPress={() => {
@@ -24,7 +24,8 @@ const TaskFlatList = ({ data }: { data: Array<Task> }) => {
         </View>
       </TouchableOpacity>
     );
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const emptyView = () => {
     return (
@@ -49,6 +50,6 @@ const TaskFlatList = ({ data }: { data: Array<Task> }) => {
       maxToRenderPerBatch={20}
     />
   );
-};
+});
 
 export default TaskFlatList;
